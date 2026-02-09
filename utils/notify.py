@@ -1,5 +1,10 @@
+import base64
+import hashlib
+import hmac
 import os
 import smtplib
+import time
+import urllib.parse
 from email.mime.text import MIMEText
 from typing import Literal
 
@@ -34,6 +39,10 @@ class NotificationKit:
 	@property
 	def dingding_webhook(self):
 		return os.getenv('DINGDING_WEBHOOK')
+
+	@property
+	def dingding_secret(self):
+		return os.getenv('DINGDING_SECRET')
 
 	@property
 	def feishu_webhook(self):
@@ -85,8 +94,18 @@ class NotificationKit:
 		if not self.dingding_webhook:
 			raise ValueError('DingTalk Webhook not configured')
 
+		webhook_url = self.dingding_webhook
+		if self.dingding_secret:
+			timestamp = str(round(time.time() * 1000))
+			secret_enc = self.dingding_secret.encode('utf-8')
+			string_to_sign = f'{timestamp}\n{self.dingding_secret}'
+			string_to_sign_enc = string_to_sign.encode('utf-8')
+			hmac_code = hmac.new(secret_enc, string_to_sign_enc, digestmod=hashlib.sha256).digest()
+			sign = urllib.parse.quote_plus(base64.b64encode(hmac_code))
+			webhook_url = f'{self.dingding_webhook}&timestamp={timestamp}&sign={sign}'
+
 		data = {'msgtype': 'text', 'text': {'content': f'{title}\n{content}'}}
-		curl_requests.post(self.dingding_webhook, json=data, timeout=30)
+		curl_requests.post(webhook_url, json=data, timeout=30)
 
 	def send_feishu(self, title: str, content: str):
 		if not self.feishu_webhook:

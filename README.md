@@ -250,6 +250,7 @@ Affs:
 ### 钉钉机器人
 
 - `DINGDING_WEBHOOK`: 钉钉机器人的 Webhook 地址
+- `DINGDING_SECRET`: 钉钉机器人的加签密钥（可选，以 SEC 开头）
 
 ### 飞书机器人
 
