@@ -10,3 +10,7 @@ logs
 balance_hash.txt
 balance_hash_*.txt
 linuxdo_reads
+
+# Dolt database files (added by bd init)
+.dolt/
+*.db
